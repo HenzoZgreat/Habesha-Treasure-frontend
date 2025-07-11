@@ -21,7 +21,10 @@ import ProductDetails from "./pages/User/ProductDetails";
 import Favorites from "./pages/User/FavoritesPage";
 import UserProfile from "./pages/User/ProfilePage";
 import OrdersPage from "./pages/User/OrdersPage";
-import CheckoutPage from "./pages/User/CheckoutPage";
+import CheckoutPage from "./pages/User/CheckoutChapa";
+import PaymentVerify from "./pages/User/Payment";
+import PaymentSuccess from "./pages/User/Payment";
+import PaymentError from "./pages/User/Payment";
 import AdminDashboardLayout from "./layout/AdminDashboardLayout";
 import DashboardOverview from "./pages/Admin/DashboardOverview";
 import ManageProducts from "./pages/ManageProducts";
@@ -61,6 +64,9 @@ function App() {
           <Route path="/orders" element={<OrdersPage />}></Route>
           <Route path="/checkout" element={<CheckoutPage />}></Route>
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/payment/verify" element={<PaymentVerify />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/error" element={<PaymentError />} />
 
         </Route>
         <Route path="/SignIn" element={<SignIn />}></Route>

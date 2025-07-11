@@ -8,7 +8,7 @@ import axios from "axios";
 // }
 
 const api = axios.create({
-  baseURL: 'https://habeshatreasure-backend-production.up.railway.app/api', // Change to your backend URL
+  baseURL: 'http://localhost:8080/api', // Change to your backend URL
   headers: {
     'Content-Type': 'application/json',
   },
