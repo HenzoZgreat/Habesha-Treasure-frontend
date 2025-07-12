@@ -21,7 +21,7 @@ import ProductDetails from "./pages/User/ProductDetails";
 import Favorites from "./pages/User/FavoritesPage";
 import UserProfile from "./pages/User/ProfilePage";
 import OrdersPage from "./pages/User/OrdersPage";
-import CheckoutPage from "./pages/User/CheckoutChapa";
+import CheckoutPage from "./pages/User/CheckoutTelebirr";
 import PaymentVerify from "./pages/User/Payment";
 import PaymentSuccess from "./pages/User/Payment";
 import PaymentError from "./pages/User/Payment";

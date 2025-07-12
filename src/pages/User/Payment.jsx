@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
-import axios from "axios"
+import PaymentService from "../../service/ChapaPaymentService"
+import UserSettingsService from "../../service/UserSettingsService"
 import PaymentVerification from "../../componets/ChapaPayment/PaymentVerification"
 import PaymentSuccess from "../../componets/ChapaPayment/PaymentSuccess"
 import PaymentError from "../../componets/ChapaPayment/PaymentError"
 import { text } from "../../componets/ChapaPayment/translations"
-import UserSettingsService from "../../service/UserSettingsService"
 
 export default function Payment() {
   const navigate = useNavigate()
@@ -59,18 +59,8 @@ export default function Payment() {
 
   const verifyPayment = async () => {
     try {
-      const token = localStorage.getItem("token")
-      console.log("Verifying payment with tx_ref:", txRef, "token:", token)
-      const response = await axios.post(
-        "http://localhost:8080/api/payments/verify",
-        { tx_ref: txRef },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      console.log("Verifying payment with tx_ref:", txRef)
+      const response = await PaymentService.verifyPayment(txRef)
       console.log("Verification response:", response.data)
 
       const result = response.data

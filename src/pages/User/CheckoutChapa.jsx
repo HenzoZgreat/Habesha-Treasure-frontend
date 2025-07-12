@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
 import UserSettingsService from "../../service/UserSettingsService"
+import UserUserService from "../../service/UserUserService"
+import PaymentService from "../../service/ChapaPaymentService"
 import { ShoppingCart, CreditCard, Truck, AlertCircle, Loader2 } from "lucide-react"
 
 // Bilingual text content
@@ -43,7 +44,7 @@ const text = {
     email: "ኢሜይል አድራሻ",
     firstName: "ስም",
     lastName: "የአባት ስም",
-    phone: "ስልክ ቁጥር (አማራጭ)",
+    phone: "ስልክ ቁጥር (የግድ አይደለም)",
     proceedPayment: "ወደ ክፍያ ይሂዱ",
     processing: "በሂደት ላይ...",
     emptyCart: "የእርስዎ ጋሪ ባዶ ነው",
@@ -58,7 +59,7 @@ const text = {
 export default function CheckoutChapa() {
   const navigate = useNavigate()
   const cartProducts = useSelector((state) => state.habesha.cartProducts)
-  const [language, setLanguage] = useState("EN")
+  const language = useSelector((state) => state.habesha.language)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
@@ -75,48 +76,47 @@ export default function CheckoutChapa() {
   const cartItems = Array.isArray(cartProducts) ? cartProducts : []
 
   useEffect(() => {
-    // Fetch settings
-    const fetchSettings = async () => {
+    const fetchSettingsAndProfile = async () => {
       try {
-        const response = await UserSettingsService.getSettings()
-        setExchangeRate(response.data.storeInfo.exchangeRate || 160)
-        setFreeShippingThreshold(response.data.shipping.freeShippingThreshold || 500)
+        const [settingsResponse, profileResponse] = await Promise.all([
+          UserSettingsService.getSettings(),
+          UserUserService.getUserProfile(),
+        ])
+        setExchangeRate(settingsResponse.data.storeInfo.exchangeRate || 160)
+        setFreeShippingThreshold(settingsResponse.data.shipping.freeShippingThreshold || 500)
+        setFormData({
+          email: profileResponse.data.email || "",
+          firstName: profileResponse.data.firstName || "",
+          lastName: profileResponse.data.lastName || "",
+          phone: profileResponse.data.phoneNumber || "",
+        })
       } catch (err) {
-        console.error('Failed to fetch settings:', err)
+        console.error('Failed to fetch settings or profile:', err)
       }
     }
-    fetchSettings()
 
-    // Check authentication
     const token = localStorage.getItem("token")
     if (!token) {
       navigate("/SignIn")
       return
     }
 
-    // Check if cart is empty
     if (!cartItems.length) {
       navigate("/")
       return
     }
 
-    // Set language from localStorage
-    const savedLanguage = localStorage.getItem("language")
-    if (savedLanguage && (savedLanguage === "EN" || savedLanguage === "AMH")) {
-      setLanguage(savedLanguage)
-    }
+    fetchSettingsAndProfile()
   }, [cartItems, navigate])
 
-  // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const isFreeShipping = subtotal >= freeShippingThreshold
   const shippingCost = isFreeShipping ? 0 : 50
   const grandTotal = subtotal + shippingCost
 
-  // Convert to ETB for Amharic display
-  const displaySubtotal = language === "AMH" ? subtotal * exchangeRate : subtotal
-  const displayShippingCost = language === "AMH" ? shippingCost * exchangeRate : shippingCost
-  const displayGrandTotal = language === "AMH" ? grandTotal * exchangeRate : grandTotal
+  const displaySubtotal = language === "AMH" ? (subtotal * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const displayShippingCost = language === "AMH" ? (shippingCost * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : shippingCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const displayGrandTotal = language === "AMH" ? (grandTotal * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   const currency = language === "AMH" ? "ETB" : "USD"
 
   const validateForm = () => {
@@ -143,8 +143,6 @@ export default function CheckoutChapa() {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-
-    // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }))
     }
@@ -161,23 +159,13 @@ export default function CheckoutChapa() {
     setError("")
 
     try {
-      const token = localStorage.getItem("token")
-      const response = await axios.post(
-        'http://localhost:8080/api/payments/initiate-chapa',
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          params: {
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phoneNumber: formData.phone || "",
-            amount: grandTotal,
-          },
-        }
+      const amount = language === "AMH" ? grandTotal * exchangeRate : grandTotal
+      const response = await PaymentService.initiateChapa(
+        formData.email,
+        formData.firstName,
+        formData.lastName,
+        formData.phone,
+        amount
       )
 
       if (response.data.checkout_url) {
@@ -218,7 +206,6 @@ export default function CheckoutChapa() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t.title}</h1>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Cart Summary */}
           <div className="bg-white rounded-lg shadow-lg border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -245,8 +232,8 @@ export default function CheckoutChapa() {
                         <span className="font-semibold">
                           {currency}{" "}
                           {language === "AMH"
-                            ? (item.price * item.quantity * exchangeRate).toFixed(2)
-                            : (item.price * item.quantity).toFixed(2)}
+                            ? (item.price * item.quantity * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            : (item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
@@ -257,7 +244,7 @@ export default function CheckoutChapa() {
                   <div className="flex justify-between">
                     <span>{t.total}</span>
                     <span>
-                      {currency} {displaySubtotal.toFixed(2)}
+                      {currency} {displaySubtotal}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -269,14 +256,14 @@ export default function CheckoutChapa() {
                       {isFreeShipping ? (
                         <span className="text-green-600 font-medium">{t.freeShipping}</span>
                       ) : (
-                        `${currency} ${displayShippingCost.toFixed(2)}`
+                        `${currency} ${displayShippingCost}`
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>{t.grandTotal}</span>
                     <span className="text-[#1E88E5]">
-                      {currency} {displayGrandTotal.toFixed(2)}
+                      {currency} {displayGrandTotal}
                     </span>
                   </div>
                 </div>
@@ -284,7 +271,6 @@ export default function CheckoutChapa() {
             </div>
           </div>
 
-          {/* Customer Information Form */}
           <div className="bg-white rounded-lg shadow-lg border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold flex items-center gap-2">

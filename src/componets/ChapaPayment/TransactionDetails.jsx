@@ -1,8 +1,23 @@
 import { CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { text } from "./translations"
+import UserSettingsService from "../../service/UserSettingsService"
+import { useState, useEffect } from "react"
 
 export default function TransactionDetails({ transactionData, language }) {
   const t = text[language]
+  const [exchangeRate, setExchangeRate] = useState(160.0)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await UserSettingsService.getSettings()
+        setExchangeRate(response.data.storeInfo.exchangeRate || 160.0)
+      } catch (err) {
+        console.error("Settings fetch error:", err.response?.data || err.message)
+      }
+    }
+    fetchSettings()
+  }, [])
 
   const getStatusColor = (status) => {
     const normalizedStatus = status.toLowerCase()
@@ -70,12 +85,12 @@ export default function TransactionDetails({ transactionData, language }) {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.amount}:</span>
                 <span className="font-semibold text-lg text-gray-900">
-                  {transactionData.currency} {Number(transactionData.amount).toFixed(2)}
+                  ETB {(Number(transactionData.amount) * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.currency}:</span>
-                <span className="font-medium text-gray-900">{transactionData.currency}</span>
+                <span className="font-medium text-gray-900">ETB</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.method}:</span>
