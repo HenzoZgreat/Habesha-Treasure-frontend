@@ -11,6 +11,7 @@ import CartService from '../../service/CartService';
 import PersonIcon from "@mui/icons-material/Person";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import UserSettingsService from '../../service/UserSettingsService';
+import PaymentMethodModal from '../../componets/Cart/PaymentMethodModal';
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ const Cart = () => {
   const [error, setError] = useState(null);
   const [exchangeRate, setExchangeRate] = useState(120); // Default value
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(1000); // Default value
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const text = {
     EN: {
@@ -119,7 +121,7 @@ const Cart = () => {
       }
     };
     fetchSettings();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     let Total = 0;
@@ -168,8 +170,13 @@ const Cart = () => {
     }
   };
 
-  const handleCheckout = () => {
-    navigate('/checkout');
+  const handleOpenModal = () => {
+    if (products.length === 0) {
+      setNotification({ message: currentText.emptyCart, type: 'error' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   if (!localStorage.getItem('token')) {
@@ -350,7 +357,7 @@ const Cart = () => {
               </span>
             </p>
             <button
-              onClick={handleCheckout}
+              onClick={handleOpenModal}
               className="w-full bg-habesha_yellow hover:bg-yellow-500 text-habesha_blue font-semibold py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
             >
               {currentText.proceedToPay}
@@ -376,6 +383,10 @@ const Cart = () => {
           </button>
         </motion.div>
       )}
+      <PaymentMethodModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

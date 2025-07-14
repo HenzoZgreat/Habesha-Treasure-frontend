@@ -173,8 +173,8 @@ const ProfilePage = () => {
 
   const tabs = [
     { id: "personal", label: currentText.personalInfo, icon: PersonIcon },
-    { id: "settings", label: currentText.accountSettings, icon: SecurityIcon },
-    { id: "orders", label: currentText.orderHistory, icon: ShoppingBagIcon },
+    // { id: "settings", label: currentText.accountSettings, icon: SecurityIcon },
+    // { id: "orders", label: currentText.orderHistory, icon: ShoppingBagIcon },
   ]
 
   if (!localStorage.getItem("token")) {
@@ -298,7 +298,7 @@ const ProfilePage = () => {
 
         {/* {activeTab === "settings" && <AccountSettingsCard user={user} currentText={currentText} language={language} />} */}
 
-        {activeTab === "orders" && <OrderHistoryCard currentText={currentText} />}
+        {/* {activeTab === "orders" && <OrderHistoryCard currentText={currentText} />} */}
       </div>
     </div>
   )

@@ -1,26 +1,13 @@
+"use client"
+
 import { CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { text } from "./translations"
-import UserSettingsService from "../../service/UserSettingsService"
-import { useState, useEffect } from "react"
 
 export default function TransactionDetails({ transactionData, language }) {
   const t = text[language]
-  const [exchangeRate, setExchangeRate] = useState(160.0)
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await UserSettingsService.getSettings()
-        setExchangeRate(response.data.storeInfo.exchangeRate || 160.0)
-      } catch (err) {
-        console.error("Settings fetch error:", err.response?.data || err.message)
-      }
-    }
-    fetchSettings()
-  }, [])
 
   const getStatusColor = (status) => {
-    const normalizedStatus = status.toLowerCase()
+    const normalizedStatus = status?.toLowerCase()
     if (normalizedStatus === "success" || normalizedStatus === "completed") {
       return "text-green-600"
     } else if (normalizedStatus === "pending") {
@@ -31,7 +18,7 @@ export default function TransactionDetails({ transactionData, language }) {
   }
 
   const getStatusIcon = (status) => {
-    const normalizedStatus = status.toLowerCase()
+    const normalizedStatus = status?.toLowerCase()
     if (normalizedStatus === "success" || normalizedStatus === "completed") {
       return <CheckCircle className="h-5 w-5 text-green-600" />
     } else if (normalizedStatus === "pending") {
@@ -85,29 +72,33 @@ export default function TransactionDetails({ transactionData, language }) {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.amount}:</span>
                 <span className="font-semibold text-lg text-gray-900">
-                  ETB {(Number(transactionData.amount) * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ETB {transactionData.amount}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.currency}:</span>
                 <span className="font-medium text-gray-900">ETB</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">{t.method}:</span>
-                <span className="font-medium text-gray-900">{transactionData.method}</span>
-              </div>
+              {transactionData.method && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">{t.method}:</span>
+                  <span className="font-medium text-gray-900">{transactionData.method}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">{t.transactionId}:</span>
                 <span className="font-mono text-sm text-gray-900 bg-white px-2 py-1 rounded border">
                   {transactionData.tx_ref}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">{t.reference}:</span>
-                <span className="font-mono text-sm text-gray-900 bg-white px-2 py-1 rounded border">
-                  {transactionData.reference}
-                </span>
-              </div>
+              {transactionData.reference && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">{t.reference}:</span>
+                  <span className="font-mono text-sm text-gray-900 bg-white px-2 py-1 rounded border">
+                    {transactionData.reference}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -124,17 +115,21 @@ export default function TransactionDetails({ transactionData, language }) {
                 <span className="text-sm font-medium text-gray-600">{t.email}:</span>
                 <span className="font-medium text-gray-900 text-sm">{transactionData.email}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">{t.phone}:</span>
-                <span className="font-medium text-gray-900">{transactionData.phone_number}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">{t.date}:</span>
-                <span className="font-medium text-gray-900 text-sm">
-                  {new Date(transactionData.created_at).toLocaleDateString()}{" "}
-                  {new Date(transactionData.created_at).toLocaleTimeString()}
-                </span>
-              </div>
+              {transactionData.phone_number && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">{t.phone}:</span>
+                  <span className="font-medium text-gray-900">{transactionData.phone_number}</span>
+                </div>
+              )}
+              {transactionData.created_at && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">{t.date}:</span>
+                  <span className="font-medium text-gray-900 text-sm">
+                    {new Date(transactionData.created_at).toLocaleDateString(language === "AMH" ? "am-ET" : "en-US")}{" "}
+                    {new Date(transactionData.created_at).toLocaleTimeString(language === "AMH" ? "am-ET" : "en-US")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -142,7 +137,7 @@ export default function TransactionDetails({ transactionData, language }) {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="h-5 w-5 text-habesha_blue" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -151,7 +146,7 @@ export default function TransactionDetails({ transactionData, language }) {
               </svg>
             </div>
             <div>
-              <h5 className="font-medium text-blue-900">{t.secureTransaction}</h5>
+              <h5 className="font-medium text-habesha_blue">{t.secureTransaction}</h5>
               <p className="text-sm text-blue-800 mt-1">{t.secureNotice}</p>
             </div>
           </div>

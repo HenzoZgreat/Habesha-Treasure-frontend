@@ -37,11 +37,11 @@ const verifyPayment = async (tx_ref) => {
   );
 };
 
-const verifyTelebirrPayment = async (transactionId) => {
+const verifyTelebirrPayment = async (transactionId, amount) => {
   const token = localStorage.getItem('token');
   return api.post(
     `${API_URL}/verify-telebirr`,
-    { transactionId },
+    { transactionId, amount },
     {
       headers: {
         Authorization: `Bearer ${token}`,

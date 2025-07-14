@@ -4,7 +4,7 @@ import { CheckCircle, ShoppingBag, Sparkles } from "lucide-react"
 import { text } from "./translations"
 import TransactionDetails from "./TransactionDetails"
 
-export default function PaymentSuccess({ transactionData, language, onContinueShopping }) {
+export default function PaymentSuccess({ transactionData, language, orderId, onContinueShopping }) {
   const t = text[language]
 
   return (
@@ -23,7 +23,7 @@ export default function PaymentSuccess({ transactionData, language, onContinueSh
             }}
           >
             <Sparkles
-              className="h-4 w-4 text-[#FBC02D] opacity-70"
+              className="h-4 w-4 text-habesha_yellow opacity-70"
               style={{
                 transform: `rotate(${Math.random() * 360}deg)`,
               }}
@@ -44,8 +44,13 @@ export default function PaymentSuccess({ transactionData, language, onContinueSh
 
           {/* Success Message */}
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-900">{t.successTitle}</h1>
-            <p className="text-lg text-[#1E88E5] font-medium">{t.successSubtitle}</p>
+            <h1 className="text-2xl font-bold text-habesha_blue">{t.successTitle}</h1>
+            <p className="text-lg text-habesha_blue font-medium">{t.successSubtitle}</p>
+            {orderId && (
+              <p className="text-sm text-gray-600">
+                {t.orderId}: <span className="font-semibold">{orderId}</span>
+              </p>
+            )}
           </div>
 
           {/* Transaction Details */}
@@ -59,7 +64,7 @@ export default function PaymentSuccess({ transactionData, language, onContinueSh
           <div className="pt-4">
             <button
               onClick={onContinueShopping}
-              className="w-full bg-[#1E88E5] hover:bg-[#1976D2] text-white py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
+              className="w-full bg-habesha_blue hover:bg-blue-700 text-white py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
             >
               <ShoppingBag className="h-5 w-5" />
               {t.continueShopping}
@@ -74,8 +79,8 @@ export default function PaymentSuccess({ transactionData, language, onContinueSh
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-10 left-10 w-20 h-20 bg-[#FBC02D] rounded-full opacity-10 animate-pulse"></div>
-      <div className="absolute bottom-10 right-10 w-16 h-16 bg-[#1E88E5] rounded-full opacity-10 animate-pulse delay-1000"></div>
+      <div className="absolute top-10 left-10 w-20 h-20 bg-habesha_yellow rounded-full opacity-10 animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-16 h-16 bg-habesha_blue rounded-full opacity-10 animate-pulse delay-1000"></div>
       <div className="absolute top-1/2 left-5 w-12 h-12 bg-green-400 rounded-full opacity-10 animate-bounce delay-500"></div>
     </div>
   )

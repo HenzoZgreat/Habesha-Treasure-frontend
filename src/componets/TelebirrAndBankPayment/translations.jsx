@@ -46,6 +46,9 @@ const translations = {
     paymentInitiationFailed: "Payment initiation failed.",
     paymentVerificationFailed: "Payment verification failed.",
     invalidTransactionId: "Please enter a valid transaction ID.",
+    payWithin30Minutes: "Please complete the payment within 30 minutes to avoid cancellation.",
+    yourOrderProcessing: "Your order is now processing.",
+    viewOrders: "View Orders",
   },
   AMH: {
     checkout: "ክፍያ",
@@ -94,6 +97,9 @@ const translations = {
     paymentInitiationFailed: "የክፍያ ማስጀመር አልተሳካም።",
     paymentVerificationFailed: "የክፍያ ማረጋገጫ አልተሳካም።",
     invalidTransactionId: "እባክዎ ትክክለኛ የግብይት መለያ ያስገቡ።",
+    payWithin30Minutes: "እባክዎ መሰረዝን ለማስቀረት ክፍያውን በ30 ደቂቃ ውስጥ ያጠናቅቁ።",
+    yourOrderProcessing: "ትዕዛዝዎ አሁን በሂደት ላይ ነው።",
+    viewOrders: "ትዕዛዞችን ይመልከቱ",
   },
 }
 

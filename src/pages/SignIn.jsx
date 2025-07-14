@@ -153,10 +153,13 @@ const SignIn = () => {
         navigate('/');
       }
     } catch (error) {
-      const msg = error.response?.data?.message || currentText.loginFailed;
-      setNotification({ message: msg, type: 'error' });
-      setTimeout(() => setNotification(null), 3000);
-    }
+        const msg =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          currentText.loginFailed;
+        setNotification({ message: msg, type: 'error' });
+        setTimeout(() => setNotification(null), 3000);
+      }
   };
 
   const handleGoogleSignIn = () => {

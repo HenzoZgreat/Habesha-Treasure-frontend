@@ -1,7 +1,7 @@
 "use client"
 
-import { XCircle } from "lucide-react"
 import { useSelector } from "react-redux"
+import { XCircle, AlertCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom"
 import TransactionDetails from "../../componets/TelebirrAndBankPayment/TransactionDetails"
 import translations from "../../componets/TelebirrAndBankPayment/translations"

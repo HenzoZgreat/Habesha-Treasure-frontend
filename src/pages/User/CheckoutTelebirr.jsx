@@ -63,15 +63,14 @@ export default function CheckoutTelebirr() {
     fetchData()
   }, [navigate, t, cartProducts])
 
-  const subtotal = cartProducts.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const exchangeRate = settings?.storeInfo?.exchangeRate || 200
+  const subtotal = cartProducts.reduce((sum, item) => sum + item.price * item.quantity * exchangeRate, 0)
   const freeShippingThreshold = settings?.shipping?.freeShippingThreshold || 500
-  const shippingCost = subtotal >= freeShippingThreshold ? 0 : 50
+  const shippingCost = subtotal >= freeShippingThreshold * exchangeRate ? 0 : 50 * exchangeRate
   const grandTotal = subtotal + shippingCost
-  const exchangeRate = settings?.storeInfo?.exchangeRate || 160
-  const currency = language === "AMH" ? "ETB" : "USD"
-  const displaySubtotal = language === "AMH" ? (subtotal * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  const displayShippingCost = language === "AMH" ? (shippingCost * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : shippingCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  const displayGrandTotal = language === "AMH" ? (grandTotal * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const displaySubtotal = subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const displayShippingCost = shippingCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const displayGrandTotal = grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   const validateForm = () => {
     const errors = {}
@@ -103,16 +102,16 @@ export default function CheckoutTelebirr() {
     setError("")
     navigate("/payment/verify-telebirr")
     try {
-      const response = await PaymentService.verifyTelebirrPayment(transactionId)
-      if (response.data.status === "Completed") {
-        navigate("/payment/success-telebirr", { state: { transactionData: response.data, settings } })
+      const response = await PaymentService.verifyTelebirrPayment(transactionId, grandTotal)
+      if (response.data.transaction.status === "Completed") {
+        navigate("/payment/success-telebirr", { state: { transactionData: response.data.transaction, settings } })
       } else {
         throw new Error(response.data.error || t.paymentVerificationFailed)
       }
     } catch (err) {
       console.error("Payment verification error:", err)
       navigate("/payment/error-telebirr", {
-        state: { error: err.response?.data?.error || err.message || t.paymentVerificationFailed, transactionData: err.response?.data, settings },
+        state: { error: err.response?.data?.error || err.message || t.paymentVerificationFailed, transactionData: err.response?.data?.transaction, settings },
       })
     } finally {
       setLoading(false)
@@ -164,7 +163,7 @@ export default function CheckoutTelebirr() {
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-sm text-gray-600">{t.quantity}: {item.quantity}</span>
                         <span className="font-semibold">
-                          {currency} {(language === "AMH" ? item.price * item.quantity * exchangeRate : item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ETB {(item.price * item.quantity * exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
@@ -173,7 +172,7 @@ export default function CheckoutTelebirr() {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>{t.subtotal}</span>
-                    <span>{currency} {displaySubtotal}</span>
+                    <span>ETB {displaySubtotal}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="flex items-center gap-2">
@@ -183,13 +182,13 @@ export default function CheckoutTelebirr() {
                       {shippingCost === 0 ? (
                         <span className="text-green-600 font-medium">{t.freeShipping}</span>
                       ) : (
-                        `${currency} ${displayShippingCost}`
+                        `ETB ${displayShippingCost}`
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>{t.grandTotal}</span>
-                    <span className="text-[#1E88E5]">{currency} {displayGrandTotal}</span>
+                    <span className="text-[#1E88E5]">ETB {displayGrandTotal}</span>
                   </div>
                 </div>
               </div>
@@ -212,8 +211,8 @@ export default function CheckoutTelebirr() {
                   <span className="font-medium">{t.telebirr}</span>
                   {selectedPaymentMethod === "telebirr" && settings && (
                     <div className="text-sm text-gray-600 mt-2 text-center">
-                      <p>{t.phoneNumber}: {settings.storeInfo.phone}</p>
-                      <p>{t.accountName}: {settings.payment.accountName}</p>
+                      <p>{t.accountName}: {settings.payment.telebirrName}</p>
+                      <p>{t.phoneNumber}: {settings.payment.telebirrNumber}</p>
                     </div>
                   )}
                 </label>
@@ -307,8 +306,25 @@ export default function CheckoutTelebirr() {
                     placeholder="+251 9XX XXX XXX"
                   />
                 </div>
-                {showTransactionInput && (
-                  <div>
+                {settings && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+                      <CreditCard className="h-5 w-5" /> {t.paymentInstructions}
+                    </h3>
+                    <p>{t.pleasePayTo}</p>
+                    <p className="font-medium">{t.accountName}: {selectedPaymentMethod === "telebirr" ? settings.payment.telebirrName : settings.payment.accountName}</p>
+                    <p className="font-medium">
+                      {selectedPaymentMethod === "telebirr" ? t.phoneNumber : t.accountNumber}: {selectedPaymentMethod === "telebirr" ? settings.payment.telebirrNumber : settings.payment.accountNumber}
+                    </p>
+                    {selectedPaymentMethod === "cbe" && <p className="font-medium">{t.bankName}: {settings.payment.bankName}</p>}
+                    <p className="font-medium">{t.amount}: ETB {displayGrandTotal}</p>
+                    <p className="text-sm text-red-600 mt-2">{t.payWithin30Minutes}</p>
+                  </div>
+                )}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${showTransactionInput ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                >
+                  <div className="mt-4">
                     <label htmlFor="transactionId" className="block text-sm font-medium text-gray-700 mb-1">{t.enterTransactionId}</label>
                     <input
                       id="transactionId"
@@ -318,21 +334,7 @@ export default function CheckoutTelebirr() {
                       placeholder={t.transactionIdPlaceholder}
                     />
                   </div>
-                )}
-                {settings && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
-                      <CreditCard className="h-5 w-5" /> {t.paymentInstructions}
-                    </h3>
-                    <p>{t.pleasePayTo}</p>
-                    <p className="font-medium">{t.accountName}: {settings.payment.accountName}</p>
-                    <p className="font-medium">
-                      {selectedPaymentMethod === "telebirr" ? t.phoneNumber : t.accountNumber}: {selectedPaymentMethod === "telebirr" ? settings.storeInfo.phone : settings.payment.accountNumber}
-                    </p>
-                    {selectedPaymentMethod === "cbe" && <p className="font-medium">{t.bankName}: {settings.payment.bankName}</p>}
-                    <p className="font-medium">{t.amount}: {currency} {displayGrandTotal}</p>
-                  </div>
-                )}
+                </div>
                 <button
                   onClick={showTransactionInput ? handleVerifyPayment : handleProceedToPayment}
                   disabled={loading}

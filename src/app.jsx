@@ -21,10 +21,19 @@ import ProductDetails from "./pages/User/ProductDetails";
 import Favorites from "./pages/User/FavoritesPage";
 import UserProfile from "./pages/User/ProfilePage";
 import OrdersPage from "./pages/User/OrdersPage";
-import CheckoutPage from "./pages/User/CheckoutTelebirr";
-import PaymentVerify from "./pages/User/Payment";
-import PaymentSuccess from "./pages/User/Payment";
-import PaymentError from "./pages/User/Payment";
+
+import ManualCheckoutPage from "./pages/User/CheckoutPage";
+
+import ChapaCheckoutPage from "./pages/User/CheckoutChapa";
+import ChapaPaymentVerify from "./pages/User/Payment";
+import ChapaPaymentSuccess from "./pages/User/Payment";
+import ChapaPaymentError from "./pages/User/Payment";
+
+import TelebirrCheckoutPage from "./pages/User/CheckoutTelebirr";
+import TelebirrOrBankPaymentVerify from "./componets/TelebirrAndBankPayment/PaymentVerification";
+import TelebirrOrBankPaymentSuccess from "./componets/TelebirrAndBankPayment/PaymentSuccess";
+import TelebirrOrBankPaymentError from "./componets/TelebirrAndBankPayment/PaymentError";
+
 import AdminDashboardLayout from "./layout/AdminDashboardLayout";
 import DashboardOverview from "./pages/Admin/DashboardOverview";
 import ManageProducts from "./pages/ManageProducts";
@@ -62,11 +71,18 @@ function App() {
           <Route path="/favorites" element={<Favorites />}></Route>
           <Route path="/profile" element={<UserProfile />}></Route>
           <Route path="/orders" element={<OrdersPage />}></Route>
-          <Route path="/checkout" element={<CheckoutPage />}></Route>
           <Route path="/search" element={<SearchResults />} />
-          <Route path="/payment/verify" element={<PaymentVerify />} />
-          <Route path="/payment/success" element={<PaymentSuccess />} />
-          <Route path="/payment/error" element={<PaymentError />} />
+          <Route path="/checkout/manual" element={<ManualCheckoutPage />}></Route>
+          
+          <Route path="/checkout/chapa" element={<ChapaCheckoutPage />}></Route>
+          <Route path="/payment/verify" element={<ChapaPaymentVerify />} />
+          <Route path="/payment/success" element={<ChapaPaymentSuccess />} />
+          <Route path="/payment/error" element={<ChapaPaymentError />} />
+
+          <Route path="/checkout/telebirr" element={<TelebirrCheckoutPage />}></Route>
+          <Route path="/payment/verify-telebirr" element={<TelebirrOrBankPaymentVerify />} />
+          <Route path="/payment/success-telebirr" element={<TelebirrOrBankPaymentSuccess />} />
+          <Route path="/payment/error-telebirr" element={<TelebirrOrBankPaymentError />} />
 
         </Route>
         <Route path="/SignIn" element={<SignIn />}></Route>

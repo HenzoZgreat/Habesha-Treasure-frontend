@@ -18,12 +18,21 @@ export default function Payment() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [transactionData, setTransactionData] = useState(null)
+  const [orderId, setOrderId] = useState(null)
   const [settings, setSettings] = useState(null)
 
   const t = text[language]
 
   const searchParams = new URLSearchParams(location.search)
   const txRef = searchParams.get("tx_ref")
+
+  const formatAmount = (amount) => {
+    const value = parseFloat(amount) || 0
+    return value.toLocaleString(language === "AMH" ? "am-ET" : "en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -65,10 +74,15 @@ export default function Payment() {
 
       const result = response.data
 
-      if (result.status === "success" && result.data) {
-        setTransactionData(result.data)
+      if (result.message === "Payment verified and order placed." && result.transaction?.data) {
+        setTransactionData({
+          ...result.transaction.data,
+          amount: formatAmount(result.transaction.data.amount),
+          charged_amount: formatAmount(result.transaction.data.charged_amount),
+        })
+        setOrderId(result.orderId)
         setLoading(false)
-        const transactionStatus = result.data.status.toLowerCase()
+        const transactionStatus = result.transaction.data.status.toLowerCase()
         if (transactionStatus === "success" || transactionStatus === "completed") {
           console.log("Transitioning to success")
           setCurrentState("success")
@@ -78,20 +92,23 @@ export default function Payment() {
         } else {
           console.log("Transitioning to error")
           setCurrentState("error")
+          setError(t.verificationFailed)
         }
+      } else if (result.error || result.status === "error") {
+        throw new Error(result.error || result.message || t.verificationFailed)
       } else {
-        throw new Error(result.message || t.verificationFailed)
+        throw new Error(t.verificationFailed)
       }
     } catch (err) {
       console.error("Payment verification error:", err.response?.data || err.message)
-      setError(err.response?.data?.message || err.message || t.verificationFailed)
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || t.verificationFailed)
       setCurrentState("error")
       setLoading(false)
     }
   }
 
   const handleTryAgain = () => {
-    navigate("/checkout")
+    navigate("/cart")
   }
 
   const handleContinueShopping = () => {
@@ -113,6 +130,7 @@ export default function Payment() {
       <PaymentSuccess
         language={language}
         transactionData={transactionData}
+        orderId={orderId}
         onContinueShopping={handleContinueShopping}
       />
     )

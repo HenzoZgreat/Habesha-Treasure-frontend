@@ -21,7 +21,7 @@ export default function PaymentError({ language, transactionData, error, onTryAg
 
           {/* Error Message */}
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-900">{t.errorTitle}</h1>
+            <h1 className="text-2xl font-bold text-habesha_blue">{t.errorTitle}</h1>
             <p className="text-lg text-red-600 font-medium">{error || t.errorSubtitle}</p>
           </div>
 
@@ -56,7 +56,7 @@ export default function PaymentError({ language, transactionData, error, onTryAg
           <div className="space-y-3 pt-4">
             <button
               onClick={onTryAgain}
-              className="w-full bg-[#1E88E5] hover:bg-[#1976D2] text-white py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
+              className="w-full bg-habesha_blue hover:bg-blue-700 text-white py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
             >
               <RefreshCw className="h-5 w-5" />
               {t.tryAgain}
@@ -64,7 +64,7 @@ export default function PaymentError({ language, transactionData, error, onTryAg
 
             <button
               onClick={onContinueShopping}
-              className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 bg-transparent flex items-center justify-center gap-2"
+              className="w-full bg-habesha_yellow hover:bg-yellow-500 text-habesha_blue py-3 px-4 rounded-md text-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
             >
               <ShoppingBag className="h-5 w-5" />
               {t.continueShopping}
