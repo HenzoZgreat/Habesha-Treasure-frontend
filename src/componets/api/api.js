@@ -8,8 +8,9 @@ import axios from "axios";
 // }
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Change to your backend URL
+  baseURL: 'https://720b7eb96053.ngrok-free.app/api', // Change to your backend URL
   headers: {
+    "ngrok-skip-browser-warning": "true",
     'Content-Type': 'application/json',
   },
 })
