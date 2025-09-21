@@ -111,6 +111,7 @@ const SignIn = () => {
   };
 
   const handleSignIn = async (e) => {
+    console.log("Sign in Clicked!!!!");
     e.preventDefault();
 
     let isValid = true;
@@ -138,6 +139,7 @@ const SignIn = () => {
         email,
         password,
       });
+      console.log('Request login sent to : ', api.defaults.baseURL + '/auth/login');
 
       localStorage.setItem('token', response.data.token);
 
